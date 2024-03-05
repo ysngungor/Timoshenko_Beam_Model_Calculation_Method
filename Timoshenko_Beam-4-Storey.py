@@ -2,35 +2,36 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-num_f = 4              # Kat sayısı
-num_h = 3.29           # (m) Kat yüksekliği
-H = num_f * num_h      # (m) Bina yüksekliği
-E = 200 * 10**6        # (kN/m2) Elastisite modülü
-G = 77 * 10**6         # (kN/m2) Kayma modülü
-mass = 150             # (t/kat)
-Mt = 2 * mass * num_f  # (t) Toplam kütle (2 adet perde)
-roA = mass / num_h     # (t/m) Kat yüksekliğine yayılan kütle
+"""### Building Features ###"""
+num_f = 4              # Number of floors
+num_h = 3.29           # (m) Floor height
+H = num_f * num_h      # (m) Building height
+E = 200 * 10**6        # (kN/m2) Elasticity modulus
+G = 77 * 10**6         # (kN/m2) Shear modulus
+mass = 150             # (t/floor)
+Mt = 2 * mass * num_f  # (t) Total Mass (2 shear wall)
+roA = mass / num_h     # (t/m) Mass spread over floor height
 
-"""### Kolon Özellikleri ###"""
+"""### Column Properties ###"""
 # HD400x287
-Ic = 0.9971 * 10**(-3)    # (m4) Atalet momenti
-Ac = 366.3 * 10**(-4)     # (m2) Alan
-d = 0.393                 # (m)  Profil yüksekliği
-Afl = 14603.4 * 10**(-6)  # (m2) Flanş alanı
-Aweb = 8881.8 * 10**(-6)  # (m2) Gövde alanı
-tweb = 22.6 * 10**(-3)    # (m)  Gövde kalınlığı
+Ic = 0.9971 * 10**(-3)    # (m4) Moment of inertia
+Ac = 366.3 * 10**(-4)     # (m2) Area
+d = 0.393                 # (m)  Profile height
+Afl = 14603.4 * 10**(-6)  # (m2) Flange area
+Aweb = 8881.8 * 10**(-6)  # (m2) Web area
+tweb = 22.6 * 10**(-3)    # (m)  Web thickness
 
-"""### Duvar Özellikleri ###"""
-plw = 3      # (m) Levha genişliği
-ptk = 0.003  # (m) Levha kalınlığı
+"""### Wall Properties ###"""
+plw = 3      # (m) Plate width
+ptk = 0.003  # (m) Plate thickness
 
-"""### Deprem Parametreleri ###"""
-Sa1 = 1.752008  # (m/s2) Spektral ivme
-Sa2 = 2.819928  # (m/s2) Spektral ivme
-Sa3 = 2.553271  # (m/s2) Spektral ivme
-Sd1 = 0.016318  # (m) Spektral yer değiştirme
-Sd2 = 0.002344  # (m) Spektral yer değiştirme
-Sd3 = 0.000582  # (m) Spektral yer değiştirme
+"""### Earthquake Parameters ###"""
+Sa1 = 1.752008  # (m/s2) Spectral Acceleration
+Sa2 = 2.819928  # (m/s2) Spectral Acceleration
+Sa3 = 2.553271  # (m/s2) Spectral Acceleration
+Sd1 = 0.016318  # (m) Spectral Displacement
+Sd2 = 0.002344  # (m) Spectral Displacement
+Sd3 = 0.000582  # (m) Spectral Displacement
 
 Q1 = Afl * (plw * 0.5 + d)
 Q2 = Q1 + Aweb * 0.5 * (plw + d)
@@ -42,7 +43,7 @@ beta2 = (Q3**2 + Q4**2) * plw / (2 * ptk)
 beta = beta1 + beta2
 
 Iw = (ptk * plw**3 / 12) + 2 * Ac * ((d + plw) / 2)**2 + 2 * Ic
-# Iw: Yanal yüke dayanıklı sistemin bir parçası olan her duvar için, değiştirilmiş ikinci alan momenti
+# Iw: Modified second moment of area for each wall that is part of the lateral load resisting system.
 KGAw = (Iw**2 / beta) * G
 
 r2 = E * Iw / (KGAw * H**2)
@@ -94,9 +95,9 @@ for i in index_r2:
         x = True
 
 if x != True:
-    df.loc[r2] = np.nan  # r2 değerine göre bilinmeyen satırı eklenmesi
-    df = df.reindex(sorted(df.index), axis=0)  # Listenin r2 değeri ile tekrar sıralanması
-    df = df.interpolate(method="polynomial", order=1).round(4)  # 1. derece polinom interpolasyonu
+    df.loc[r2] = np.nan  # Adding unknown row based on r2 value
+    df = df.reindex(sorted(df.index), axis=0)  # Reordering the list with r2 value
+    df = df.interpolate(method="polynomial", order=1).round(4)  # 1st degree polynomial interpolation
     df = df.loc[r2]
 
 S1 = df.loc["S1"]
