@@ -1,3 +1,5 @@
+![Timoshenko-Beam](https://github.com/ysngungor/Timoshenko_Beam_Model_Calculation_Method/assets/161377492/07820657-d672-4678-8f66-a136bccf6b90)
+
 # Code Scaffolding
 + In this study, I will focus on the code. You can find theoretical information on the subject in my master's thesis titled "An approach for the analysis of steel plate shear wall systems under earthquake loads", published in 2022.
 [Thesis Center](https://tez.yok.gov.tr/UlusalTezMerkezi/giris.jsp)
